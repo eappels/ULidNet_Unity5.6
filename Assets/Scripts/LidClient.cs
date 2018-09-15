@@ -63,8 +63,27 @@ public class LidClient : LidPeer
         }
     }
 
+    protected override void OnDataMessage(NetIncomingMessage nim)
+    {
+        switch (nim.ReadByte())
+        {
+            case LidPeer.REMOTE_CALL_FLAG:
+                NetworkRemoteCallReceiver.ReceiveRemoteCall(nim);
+                break;
+            case LidPeer.ACTOR_EVENT_FLAG:
+                //ReceiveObjectState(nim);
+                break;
+        }
+    }
+
     protected override void OnDebugMessage(NetIncomingMessage nim)
     {
         if (OnNetworkDebugMessage != null) OnNetworkDebugMessage(nim.ReadString());
+    }
+
+    public void RPC_Hello(NetIncomingMessage nim, byte host_id)
+    {
+        this.host_id = host_id;
+        NetworkRemoteCallSender.CallOnServer("RPC_RequestObjects");
     }
 }
