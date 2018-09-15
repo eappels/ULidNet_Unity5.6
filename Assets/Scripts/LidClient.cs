@@ -100,4 +100,12 @@ public class LidClient : LidPeer
         NetworkRemoteCallSender.CallOnServer("RPC_RequestObjectRegistration", net_actor.actor_id);
         NetworkActorRegistry.RegisterActor(net_actor);
     }
+
+    public void RPC_Despawn(NetIncomingMessage msg, int objectId)
+    {
+        var net_actor = NetworkActorRegistry.GetById(objectId);
+        NetworkRemoteCallSender.CallOnServer("RPC_RequestObjectDeregistration", net_actor.actor_id);
+        NetworkActorRegistry.UnregisterActor(net_actor);
+        GameObject.Destroy(net_actor.gameObject);
+    }
 }

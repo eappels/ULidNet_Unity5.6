@@ -20,6 +20,7 @@ public class LidServer : LidPeer
         isclient = false;
 
         host_id_counter = 0;
+        actor_id_counter = 0;
 
         var config = CreateConfig();
         config.Port = APPPORT;
@@ -104,6 +105,13 @@ public class LidServer : LidPeer
         client.proximity_set.Add(obj);
     }
 
+    public void RPC_RequestObjectDeregistration(NetIncomingMessage msg, int actor_id)
+    {
+        var client = GetClientInfo(msg);
+        var obj = NetworkActorRegistry.GetById(actor_id);
+        client.proximity_set.Remove(obj);
+    }
+
     public void RPC_RequestSpawn(NetIncomingMessage msg, string prefab_name, Vector3 pos, Quaternion rot)
     {
         var client_info = GetClientInfo(msg);
@@ -111,7 +119,7 @@ public class LidServer : LidPeer
         var obj = game_object.GetComponent<NetworkActor>();
 
         obj.host_id = client_info.host_id;
-        obj.actor_id = actor_id_counter++;
+        client_info.actor_id = obj.actor_id = actor_id_counter++;
         obj.is_owner = false;
         obj.owner = client_info;
         obj.prefab_name = prefab_name;
@@ -123,5 +131,17 @@ public class LidServer : LidPeer
             obj.host_id, obj.actor_id, obj.prefab_name,
             obj.transform.position, obj.transform.rotation
         );
+    }
+
+    public void RPC_RequestDespawn(NetIncomingMessage msg)
+    {
+        var client_info = GetClientInfo(msg);
+        if (client_info.has_spawned)
+        {
+            client_info.has_spawned = false;
+            var net_actor = NetworkActorRegistry.GetById(client_info.actor_id);
+            GameObject.Destroy(net_actor.gameObject);
+            NetworkRemoteCallSender.CallOnAllClients("RPC_Despawn", client_info.actor_id);
+        }
     }
 }

@@ -45,6 +45,10 @@ public class LidClientBehaviour : MonoBehaviour
         {
             NetworkRemoteCallSender.CallOnServer("RPC_RequestSpawn", "Prefabs/PlayerPrefab", new Vector3(UnityEngine.Random.Range(-5, 5), 0, 0), Quaternion.identity);
         }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            NetworkRemoteCallSender.CallOnServer("RPC_RequestDespawn");
+        }
     }
 
     private void btn_Connect_Click()
