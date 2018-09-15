@@ -39,6 +39,14 @@ public class LidClientBehaviour : MonoBehaviour
         if (lidclient != null) lidclient.MessagePump();
     }
 
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            NetworkRemoteCallSender.CallOnServer("RPC_RequestSpawn", "Prefabs/PlayerPrefab", new Vector3(UnityEngine.Random.Range(-5, 5), 0, 0), Quaternion.identity);
+        }
+    }
+
     private void btn_Connect_Click()
     {
         lidclient.Connect(UIManager.instance.txt_Ipaddress.GetComponent<InputField>().text);
