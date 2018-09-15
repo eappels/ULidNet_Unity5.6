@@ -1,5 +1,6 @@
 ﻿using Lidgren.Network;
 using System;
+using UnityEngine;
 
 public class LidClient : LidPeer
 {
@@ -85,5 +86,26 @@ public class LidClient : LidPeer
     {
         this.host_id = host_id;
         NetworkRemoteCallSender.CallOnServer("RPC_RequestObjects");
+    }
+
+    public void RPC_Spawn(NetIncomingMessage msg, byte hostId, int objectId, string prefabName, Vector3 pos, Quaternion rot)
+    {
+        var game_object = (GameObject)GameObject.Instantiate(Resources.Load(prefabName), pos, rot);
+        var net_actor = game_object.GetComponent<NetworkActor>();
+        net_actor.host_id = hostId;
+        net_actor.actor_id = objectId;
+        net_actor.is_owner = LidPeer.instance.host_id == hostId;
+        net_actor.prefab_name = prefabName;
+
+        NetworkRemoteCallSender.CallOnServer("RPC_RequestObjectRegistration", net_actor.actor_id);
+        NetworkActorRegistry.RegisterActor(net_actor);
+    }
+
+    public void RPC_Despawn(NetIncomingMessage msg, int objectId)
+    {
+        var net_actor = NetworkActorRegistry.GetById(objectId);
+        NetworkRemoteCallSender.CallOnServer("RPC_RequestObjectDeregistration", net_actor.actor_id);
+        NetworkActorRegistry.UnregisterActor(net_actor);
+        GameObject.Destroy(net_actor.gameObject);
     }
 }
