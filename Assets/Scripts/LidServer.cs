@@ -56,6 +56,8 @@ public class LidServer : LidPeer
                 NetworkRemoteCallSender.CallOnClient(newclient, "RPC_Hello", newclient.host_id);
                 break;
             case NetConnectionStatus.Disconnected:
+                RPC_RequestDespawn(nim);
+                connected_clients.Remove(GetClientInfo(nim));
                 break;
         }
     }
@@ -141,7 +143,7 @@ public class LidServer : LidPeer
             client_info.has_spawned = false;
             var net_actor = NetworkActorRegistry.GetById(client_info.actor_id);
             GameObject.Destroy(net_actor.gameObject);
-            NetworkRemoteCallSender.CallOnAllClients("RPC_Despawn", client_info.actor_id);
+            if (connected_clients.Count > 1) NetworkRemoteCallSender.CallOnAllClients("RPC_Despawn", client_info.actor_id);
         }
     }
 }

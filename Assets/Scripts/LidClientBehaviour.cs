@@ -107,6 +107,8 @@ public class LidClientBehaviour : MonoBehaviour
 
     private void OnDisconnected()
     {
+        GameObject[] objectsToRemove = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject obj in objectsToRemove) GameObject.Destroy(obj);
         UIManager.instance.btn_Disconnect.SetActive(false);
         UIManager.instance.txt_Ipaddress.SetActive(true);
         UIManager.instance.btn_Connect.SetActive(true);
